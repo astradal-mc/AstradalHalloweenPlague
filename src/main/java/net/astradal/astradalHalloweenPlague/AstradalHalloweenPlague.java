@@ -5,16 +5,18 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.command.brigadier.Commands;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import net.astradal.astradalHalloweenPlague.Commands.PlagueCommand;
-import net.astradal.astradalHalloweenPlague.Commands.StaffSelection;
-import net.astradal.astradalHalloweenPlague.Database.DatabaseManager;
-import net.astradal.astradalHalloweenPlague.Database.InfectionRepository;
-import net.astradal.astradalHalloweenPlague.Database.RegionRepository;
-import net.astradal.astradalHalloweenPlague.Listeners.HospitalListener;
-import net.astradal.astradalHalloweenPlague.Listeners.InfectionListener;
-import net.astradal.astradalHalloweenPlague.Plague.PlagueManager;
-import net.astradal.astradalHalloweenPlague.Plague.PlagueProgressionTask;
-import net.astradal.astradalHalloweenPlague.Util.RegionUtil;
+import net.astradal.astradalHalloweenPlague.commands.PlagueCommand;
+import net.astradal.astradalHalloweenPlague.commands.StaffSelection;
+import net.astradal.astradalHalloweenPlague.database.DatabaseManager;
+import net.astradal.astradalHalloweenPlague.database.InfectionRepository;
+import net.astradal.astradalHalloweenPlague.database.RegionRepository;
+import net.astradal.astradalHalloweenPlague.listeners.HospitalListener;
+import net.astradal.astradalHalloweenPlague.listeners.InfectionListener;
+import net.astradal.astradalHalloweenPlague.plague.PlagueConfig;
+import net.astradal.astradalHalloweenPlague.plague.PlagueManager;
+import net.astradal.astradalHalloweenPlague.plague.PlagueProgressionTask;
+import net.astradal.astradalHalloweenPlague.plague.PlagueStage;
+import net.astradal.astradalHalloweenPlague.util.RegionUtil;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class AstradalHalloweenPlague extends JavaPlugin {
@@ -25,6 +27,7 @@ public class AstradalHalloweenPlague extends JavaPlugin {
     private PlagueManager plagueManager;
     private RegionUtil regionUtil;
     private StaffSelection staffSelection;
+    private PlagueConfig plagueConfig;
 
     @Override
     public void onEnable() {
@@ -32,7 +35,11 @@ public class AstradalHalloweenPlague extends JavaPlugin {
         // For now, we'll keep it just in case.
         saveDefaultConfig();
 
+        this.plagueConfig = new PlagueConfig(this);
+        PlagueStage.initialize(this.plagueConfig);
+
         // --- 1-3. Database Setup ---
+
         this.databaseManager = new DatabaseManager(this);
 
         try {
@@ -41,7 +48,6 @@ public class AstradalHalloweenPlague extends JavaPlugin {
             databaseManager.runSchemaFromResource("/schema.sql");
         } catch (Exception e) {
             getLogger().severe("FATAL: Failed to initialize database. Disabling plugin.");
-            e.printStackTrace();
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -106,6 +112,15 @@ public class AstradalHalloweenPlague extends JavaPlugin {
         });
     }
 
+    public void reloadPlagueConfig() {
+        // 1. Reload config file data
+        this.plagueConfig = new PlagueConfig(this);
+        // 2. Re-inject the new config into the static enum
+        PlagueStage.initialize(this.plagueConfig);
+        // Note: The PlagueProgressionTask will use the newly injected config
+        // for effects and timings in its next run via PlagueStage.getEffects()
+    }
+
     // --- Getters for Managers ---
 
     public InfectionRepository getInfectionRepository() {
@@ -126,5 +141,9 @@ public class AstradalHalloweenPlague extends JavaPlugin {
 
     public StaffSelection getStaffSelection() {
         return staffSelection;
+    }
+
+    public PlagueConfig getPlagueConfig() {
+        return plagueConfig;
     }
 }
