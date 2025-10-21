@@ -115,7 +115,3 @@ The region management uses a simple selection system where you must set two corn
 3.  The player is **free to move** within the bounds of the hospital.
 4.  If the player **leaves the hospital zone** at any point, the cure is immediately canceled.
 5.  If the player stays for the full duration, they are cured, the debuffs are removed, and the infection record is deleted.
-
------
-
-*(Optional: Add a section for developers if you plan to accept contributions.)*
