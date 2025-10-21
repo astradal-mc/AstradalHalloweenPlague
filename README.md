@@ -1,15 +1,16 @@
-# Astradal Halloween Plague Plugin
+#  Astradal Halloween Plague Plugin
 
 **A PaperMC plugin for a progressive, contagious plague designed for a Halloween event.**
 
-This plugin introduces a multi-stage disease that spreads via contact and proximity, requiring staff-designated "Hospital Zones" for curing.
+This plugin introduces a multi-stage disease that spreads via hostile mobs, contact, and proximity, requiring staff-designated "Hospital Zones" for curing.
 
 ## ✨ Features
 
   * **Progressive Infection:** The plague advances through three configurable stages, increasing debuffs over time.
-  * **Contagion:** Players spread the plague through physical contact (hitting) or close proximity to infected players (Stage 2+).
-  * **Configurable Effects:** All debuffs (Slowness, Weakness, Blindness, etc.) and progression timers are configurable in `config.yml`.
-  * **Hospital Zones:** Staff can designate cure zones where infected players must stand still for a configurable duration to be cured, visible via a BossBar timer.
+  * **Initial Infection Vectors:** Players can be infected via a **configurable chance when hit by a Zombie**.
+  * **Contagion Spread:** Infected players spread the plague through physical contact (hitting) or close proximity to other players (Stage 2+).
+  * **Configurable Effects:** All debuffs (Slowness, Weakness, Blindness, etc.), infection chances, and progression timers are tunable in `config.yml`.
+  * **Hospital Zones:** Staff can designate cure zones where infected players must remain within the bounds for a configurable duration to be cured, visible via a BossBar timer.
   * **Database Persistence:** Infection and Hospital Zone data are stored persistently using SQLite.
   * **Modern API:** Built using the latest PaperMC API, Kyori Adventure components for messaging, and Brigadier for commands.
 
@@ -25,23 +26,27 @@ This plugin introduces a multi-stage disease that spreads via contact and proxim
 1.  Download the latest `AstradalHalloweenPlague.jar` from the release page.
 2.  Place the JAR file into your server's `plugins/` directory.
 3.  Start the server once to generate the plugin folder and default configuration (`config.yml`).
-4.  Stop the server and edit `config.yml` to tune plague effects and timers.
+4.  Stop the server and edit `config.yml` to tune plague effects, timers, and the new Zombie infection chance.
 5.  Restart the server.
 
 -----
 
 ## ⚙️ Configuration (`config.yml`)
 
-The primary configuration controls the progression and cure time.
+The primary configuration controls the plague's spread, progression, and cure time.
 
 ```yaml
 progression_settings:
 
-  # Proximity infection radius in blocks (used in PlagueProgressionTask)
-  infection_radius: 5.0 
-
   # Time (in seconds) required for a player to be cured in a hospital zone.
   cure_time_seconds: 45 
+
+  # Proximity infection radius in blocks (used in PlagueProgressionTask)
+  infection_radius: 5.0 
+  
+  # New setting: Percentage chance (0.0 to 100.0) that a player gets infected 
+  # when struck by a Zombie.
+  zombie_infection_chance_percent: 10 
 
   stages:
     
@@ -77,15 +82,13 @@ progression_settings:
 
 All administrative commands use the root alias `/plague` or `/p`. All commands below require the permission `astradalplague.admin.<subcommand>`.
 
-### Plague Management
-
 | Command | Usage | Permission | Description |
 | :--- | :--- | :--- | :--- |
 | `/plague help` | | `astradalplague.admin.help` | Displays the help menu. |
 | `/plague infect <player>` | `/p infect Pookachu` | `astradalplague.admin.infect` | Manually infects a target player (starts at Stage 1). |
 | `/plague cure <player>` | `/p cure Pookachu` | `astradalplague.admin.cure` | Manually removes the plague from a player. |
 | `/plague stage <player> <stage>` | `/p stage Pookachu 3` | `astradalplague.admin.stage` | Forcefully sets the infected player's plague stage (1, 2, or 3). |
-| `/plague reload` | | `astradalplague.admin.reload` | Reloads `config.yml` and re-initializes all stages/timers. |
+| `/plague reload` | | `astradalplague.admin.reload` | Reloads `config.yml` (effects, timers) and hospital regions. |
 
 ### Hospital Region Management
 
@@ -102,16 +105,16 @@ The region management uses a simple selection system where you must set two corn
 
 ## 🦠 Plague Stages & Behavior
 
-| Stage | Duration | Contagious? | Debuffs |
-| :--- | :--- | :--- | :--- |
-| **Stage 1** | Configurable (e.g., 3m) | **No** | Minor debuffs (Hunger, Nausea I) |
-| **Stage 2** | Configurable (e.g., 5m) | **Yes** (Proximity & Contact) | Moderate debuffs (Slowness I, Weakness I, Nausea II) |
-| **Stage Final** | Permanent | **Yes** (Proximity & Contact) | Severe debuffs (Slowness II, Weakness II, Blindness) |
+| Stage | Duration | Initial Infection Vector | Spread Vector | Debuffs |
+| :--- | :--- | :--- | :--- | :--- |
+| **Stage 1** | Configurable (e.g., 3m) | **Zombie Hit (10%)** | **No** | Minor debuffs (Hunger, Nausea I) |
+| **Stage 2** | Configurable (e.g., 5m) | N/A | **Yes** (Proximity & Contact) | Moderate debuffs (Slowness I, Weakness I, Nausea II) |
+| **Stage Final** | Permanent | N/A | **Yes** (Proximity & Contact) | Severe debuffs (Slowness II, Weakness II, Blindness) |
 
 ### Curing Process
 
 1.  An infected player must enter a staff-designated **Hospital Zone**.
-2.  Upon entering, a BossBar appears showing the **"CURE IN PROGRESS"** timer (e.g., 45 seconds).
+2.  Upon entering, a BossBar appears showing the **"CURE IN PROGRESS"** timer.
 3.  The player is **free to move** within the bounds of the hospital.
 4.  If the player **leaves the hospital zone** at any point, the cure is immediately canceled.
-5.  If the player stays for the full duration, they are cured, the debuffs are removed, and the infection record is deleted.
+5.  If the player stays for the full configurable duration, they are cured, the debuffs are removed, and the infection record is deleted.
