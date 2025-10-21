@@ -1,0 +1,8 @@
+name: AstradalHalloweenPlague
+version: '1.0.0'
+main: net.astradal.astradalHalloweenPlague.AstradalHalloweenPlague
+api-version: '1.21'
+prefix: AstradalPorts
+authors: [ Pookachu ]
+description: A plugin for Astradal that adds a plague for the Halloween Event 2025
+website: https://www.astradal.net
