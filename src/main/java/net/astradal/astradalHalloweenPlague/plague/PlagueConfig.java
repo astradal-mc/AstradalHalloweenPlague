@@ -19,6 +19,7 @@ public class PlagueConfig {
     private final Map<String, StageSettings> stageSettingsMap = new HashMap<>();
     private double infectionRadius;
     private int cureTimeSeconds;
+    private double zombieInfectionChance;
 
     public PlagueConfig(AstradalHalloweenPlague plugin) {
         this.plugin = plugin;
@@ -38,6 +39,8 @@ public class PlagueConfig {
         this.infectionRadius = settings.getDouble("infection_radius", 5.0);
 
         this.cureTimeSeconds = settings.getInt("cure_time_seconds", 45);
+
+        this.zombieInfectionChance = settings.getDouble("zombie_infection_chance_percent", 10.0) / 100.0; // Store as 0.10 for calculation
 
         ConfigurationSection stagesSection = settings.getConfigurationSection("stages");
         if (stagesSection == null) {
@@ -99,12 +102,16 @@ public class PlagueConfig {
         return stageSettingsMap.getOrDefault(stageKey, new StageSettings(0, List.of()));
     }
 
+    public double getInfectionRadius() {
+        return infectionRadius;
+    }
+
     public int getCureTimeSeconds() {
         return cureTimeSeconds;
     }
 
-    public double getInfectionRadius() {
-        return infectionRadius;
+    public double getZombieInfectionChance() {
+        return zombieInfectionChance;
     }
 
     // --- Inner Class to hold settings for one stage ---

@@ -3,6 +3,8 @@ package net.astradal.astradalHalloweenPlague.listeners;
 import net.astradal.astradalHalloweenPlague.AstradalHalloweenPlague;
 import net.astradal.astradalHalloweenPlague.plague.PlagueManager;
 import net.astradal.astradalHalloweenPlague.plague.PlagueStage;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -11,14 +13,16 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import java.util.Random;
+
 /**
  * Handles events related to the initial infection vectors and player lifecycle.
  */
-@SuppressWarnings("ClassCanBeRecord")
 public class InfectionListener implements Listener {
 
     private final AstradalHalloweenPlague plugin;
     private final PlagueManager plagueManager;
+    private final Random random = new Random();
 
     public InfectionListener(AstradalHalloweenPlague plugin, PlagueManager plagueManager) {
         this.plugin = plugin;
@@ -26,39 +30,62 @@ public class InfectionListener implements Listener {
     }
 
     /**
-     * Handles infection via contact (Player A hits Player B).
+     * Handles both Player-to-Player Contact infection and Zombie-to-Player infection chance.
      */
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerHit(EntityDamageByEntityEvent event) {
-        // Ensure the event involves a player attacking another player
-        if (!(event.getDamager() instanceof Player damager) || !(event.getEntity() instanceof Player target)) {
+        // --- 1. INITIAL CHECKS ---
+
+        // Ensure the receiver is a player
+        if (!(event.getEntity() instanceof Player target)) {
             return;
         }
 
-        // 1. Check if the damager (attacker) is infected
-        if (!plagueManager.isPlayerInfected(damager.getUniqueId())) {
-            return;
-        }
-
-        // 2. Check the attacker's plague stage (only contagious at Stage 2+)
-        int damagerStage = plagueManager.getActiveInfections()
-            .get(damager.getUniqueId())
-            .getStage();
-
-        PlagueStage contagiousStage = PlagueStage.getByLevel(damagerStage);
-
-        if (contagiousStage != PlagueStage.STAGE_TWO && contagiousStage != PlagueStage.STAGE_FINAL) {
-            return;
-        }
-
-        // 3. Check if the target is already infected
+        // If the player is already infected, no further infection checks are needed
         if (plagueManager.isPlayerInfected(target.getUniqueId())) {
             return;
         }
 
-        // 4. Infect the target
-        plagueManager.infectPlayer(target);
-        plugin.getLogger().info(target.getName() + " was infected by contact from " + damager.getName());
+        // --- 2. PLAYER-TO-PLAYER CONTACT INFECTION ---
+
+        if (event.getDamager() instanceof Player damager) {
+            // Check if the damager (attacker) is infected
+            if (plagueManager.isPlayerInfected(damager.getUniqueId())) {
+
+                // Check the attacker's plague stage (only contagious at Stage 2+)
+                int damagerStage = plugin.getPlagueManager().getActiveInfections()
+                    .get(damager.getUniqueId())
+                    .getStage();
+
+                PlagueStage contagiousStage = PlagueStage.getByLevel(damagerStage);
+
+                if (contagiousStage == PlagueStage.STAGE_TWO || contagiousStage == PlagueStage.STAGE_FINAL) {
+                    // Infect the target
+                    plagueManager.infectPlayer(target);
+                    plugin.getLogger().info(target.getName() + " was infected by contact from " + damager.getName());
+                    return; // EXIT: Infection successful via contact
+                }
+            }
+            // If the damager is a player but is not contagious, we're done with player-to-player
+            return;
+        }
+
+        // --- 3. ZOMBIE-TO-PLAYER INFECTION CHANCE ---
+
+        // Check if the damager is a Zombie
+        if (event.getDamager() instanceof LivingEntity damagerEntity) {
+            if (damagerEntity.getType() == EntityType.ZOMBIE) {
+
+                // Calculate chance to infect
+                double chance = plugin.getPlagueConfig().getZombieInfectionChance();
+
+                if (random.nextDouble() < chance) {
+                    // Infect the target
+                    plagueManager.infectPlayer(target);
+                    plugin.getLogger().info(target.getName() + " was infected by a Zombie attack (" + (chance * 100) + "% chance).");
+                }
+            }
+        }
     }
 
     /**

@@ -10,6 +10,9 @@ progression_settings:
   # If 45 seconds seems too fast, you can increase this value here.
   cure_time_seconds: 45
 
+  # Setting for Zombie Infection Chance
+  zombie_infection_chance_percent: 10 # 10% chance to infect on hit
+
   stages:
 
     # STAGE ONE: Initial Incubation / Minor Symptoms
