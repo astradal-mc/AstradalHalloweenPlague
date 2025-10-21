@@ -8,6 +8,7 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.astradal.astradalHalloweenPlague.commands.PlagueCommand;
 import net.astradal.astradalHalloweenPlague.commands.StaffSelection;
 import net.astradal.astradalHalloweenPlague.database.DatabaseManager;
+import net.astradal.astradalHalloweenPlague.database.ImmunityRepository;
 import net.astradal.astradalHalloweenPlague.database.InfectionRepository;
 import net.astradal.astradalHalloweenPlague.database.RegionRepository;
 import net.astradal.astradalHalloweenPlague.listeners.HospitalListener;
@@ -24,6 +25,7 @@ public class AstradalHalloweenPlague extends JavaPlugin {
     private DatabaseManager databaseManager;
     private InfectionRepository infectionRepository;
     private RegionRepository regionRepository;
+    private ImmunityRepository immunityRepository;
     private PlagueManager plagueManager;
     private RegionUtil regionUtil;
     private StaffSelection staffSelection;
@@ -54,9 +56,10 @@ public class AstradalHalloweenPlague extends JavaPlugin {
 
         // --- 4. Initialize Repositories and Managers ---
         this.infectionRepository = new InfectionRepository(this.databaseManager);
-        this.regionRepository = new RegionRepository(this.databaseManager); // NEW REPOSITORY
+        this.regionRepository = new RegionRepository(this.databaseManager);
+        this.immunityRepository = new ImmunityRepository(this.databaseManager);
 
-        this.plagueManager = new PlagueManager(this, this.infectionRepository);
+        this.plagueManager = new PlagueManager(this, this.infectionRepository, immunityRepository);
         this.regionUtil = new RegionUtil(this, this.regionRepository);
 
         this.staffSelection = new StaffSelection();
@@ -130,6 +133,8 @@ public class AstradalHalloweenPlague extends JavaPlugin {
     public RegionRepository getRegionRepository() {
         return regionRepository;
     }
+
+    public  ImmunityRepository getImmunityRepository() { return immunityRepository; }
 
     public PlagueManager getPlagueManager() {
         return plagueManager;

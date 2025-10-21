@@ -28,6 +28,7 @@ public final class HelpCommand {
         put("cure", "Manually cures an infected player.");
         put("stage", "Manually sets the plague stage for a player.");
         put("region", "Manages hospital regions (add, remove, list).");
+        put("reload", "Reloads the plugin with the config's current values.");
     }};
 
     public static LiteralArgumentBuilder<CommandSourceStack> build(CommandDispatcher<CommandSourceStack> dispatcher, AstradalHalloweenPlague plugin) {

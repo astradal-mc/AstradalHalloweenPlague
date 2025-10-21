@@ -20,6 +20,7 @@ public class PlagueConfig {
     private double infectionRadius;
     private int cureTimeSeconds;
     private double zombieInfectionChance;
+    private int immunityDurationSeconds;
 
     public PlagueConfig(AstradalHalloweenPlague plugin) {
         this.plugin = plugin;
@@ -41,6 +42,8 @@ public class PlagueConfig {
         this.cureTimeSeconds = settings.getInt("cure_time_seconds", 45);
 
         this.zombieInfectionChance = settings.getDouble("zombie_infection_chance_percent", 10.0) / 100.0; // Store as 0.10 for calculation
+
+        this.immunityDurationSeconds = settings.getInt("immunity_duration_seconds", 300);
 
         ConfigurationSection stagesSection = settings.getConfigurationSection("stages");
         if (stagesSection == null) {
@@ -112,6 +115,10 @@ public class PlagueConfig {
 
     public double getZombieInfectionChance() {
         return zombieInfectionChance;
+    }
+
+    public int getImmunityDurationSeconds() {
+        return immunityDurationSeconds;
     }
 
     // --- Inner Class to hold settings for one stage ---

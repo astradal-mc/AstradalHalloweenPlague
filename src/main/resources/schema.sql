@@ -25,3 +25,11 @@ CREATE TABLE IF NOT EXISTS regions (
     y2 INTEGER NOT NULL,
     z2 INTEGER NOT NULL
 );
+
+-- Table to store player immunity expiration
+CREATE TABLE IF NOT EXISTS immunity (
+    -- The player's unique identifier
+    player_uuid TEXT PRIMARY KEY NOT NULL,
+    -- Unix timestamp (milliseconds) when immunity expires
+    expires_time INTEGER NOT NULL
+);

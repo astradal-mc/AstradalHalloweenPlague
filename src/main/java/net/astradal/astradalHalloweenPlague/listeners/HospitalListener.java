@@ -58,7 +58,9 @@ public class HospitalListener implements Listener {
             task.start(); // Start the task and show BossBar
 
             // Send the message only ONCE when the session starts
-            MessageUtil.sendMessage(player, Component.text("You found a treatment center! You may move freely within the bounds, but do not leave! (45s)", NamedTextColor.AQUA));
+            MessageUtil.sendMessage(player, Component.text("You found a treatment center! You may move freely within the bounds, but do not leave! " +
+                "(" + plugin.getPlagueConfig().getCureTimeSeconds() + ")",
+                NamedTextColor.AQUA));
 
             // Case 2: Player leaves the Hospital Zone while curing
             // Player moves from inside the bounds to outside the bounds.

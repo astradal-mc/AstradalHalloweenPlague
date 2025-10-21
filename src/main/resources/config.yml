@@ -13,6 +13,9 @@ progression_settings:
   # Setting for Zombie Infection Chance
   zombie_infection_chance_percent: 10 # 10% chance to infect on hit
 
+  # Duration (in seconds) a player is immune after being cured.
+  immunity_duration_seconds: 300 # 5 minutes of immunity after cure
+
   stages:
 
     # STAGE ONE: Initial Incubation / Minor Symptoms

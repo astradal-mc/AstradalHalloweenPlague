@@ -1,8 +1,11 @@
 package net.astradal.astradalHalloweenPlague.plague;
 
 import net.astradal.astradalHalloweenPlague.AstradalHalloweenPlague;
+import net.astradal.astradalHalloweenPlague.database.ImmunityRepository;
 import net.astradal.astradalHalloweenPlague.database.InfectionRepository;
 import net.astradal.astradalHalloweenPlague.util.MessageUtil;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -17,52 +20,106 @@ import java.util.logging.Level;
 public class PlagueManager {
 
     private final AstradalHalloweenPlague plugin;
-    private final InfectionRepository repository;
+    private final InfectionRepository infectionRepository;
+    private final ImmunityRepository immunityRepository;
 
     // Cache to hold currently infected players in memory for quick access
     // Key: Player UUID, Value: InfectionData
     private final Map<UUID, InfectionData> activeInfections = new HashMap<>();
 
-    public PlagueManager(AstradalHalloweenPlague plugin, InfectionRepository repository) {
+    // Cache for active immunity (UUID -> Expiration Time (ms))
+    private final Map<UUID, Long> activeImmunity = new HashMap<>();
+
+    public PlagueManager(AstradalHalloweenPlague plugin, InfectionRepository infectionRepository, ImmunityRepository immunityRepository) {
         this.plugin = plugin;
-        this.repository = repository;
+        this.infectionRepository = infectionRepository;
+        this.immunityRepository = immunityRepository;
+
+        // TODO: Add logic in onEnable/onPluginStartup to load existing immunity data from DB into cache.
     }
 
     /**
-     * Attempts to load infection data for a player on login or returns empty if not infected.
-     *
-     * @param playerId The UUID of the player.
+     * Checks if a player is currently immune to infection.
+     */
+    public boolean isPlayerImmune(UUID playerId) {
+        // 1. Check in-memory cache
+        Long expires = activeImmunity.get(playerId);
+
+        if (expires != null) {
+            if (System.currentTimeMillis() < expires) {
+                return true; // Still immune
+            } else {
+                // Immunity expired, remove from cache and DB
+                removeImmunity(playerId);
+                return false;
+            }
+        }
+
+        // 2. Check DB (if not in cache, though ideally it should be loaded on login)
+        // For simplicity, we rely on the cache being updated or loaded on login/cure.
+        return false;
+    }
+
+    /**
+     * Removes immunity from a player (internal cleanup).
+     */
+    private void removeImmunity(UUID playerId) {
+        activeImmunity.remove(playerId);
+        immunityRepository.removeImmunity(playerId);
+
+        // Inform player if they are online
+        Player player = Bukkit.getPlayer(playerId);
+        if (player != null && player.isOnline()) {
+            MessageUtil.sendMessage(player, Component.text("Your plague immunity has worn off.", NamedTextColor.YELLOW));
+        }
+    }
+
+    /**
+     * Attempts to load infection data OR immunity data for a player on login.
      */
     public void loadInfection(UUID playerId) {
-        Optional<InfectionData> data = repository.getInfectionData(playerId);
+        // Load Immunity Data
+        immunityRepository.getImmunityExpiration(playerId).ifPresent(expiration -> {
+            if (System.currentTimeMillis() < expiration) {
+                activeImmunity.put(playerId, expiration);
+            } else {
+                // Remove expired immunity from DB
+                immunityRepository.removeImmunity(playerId);
+            }
+        });
+
+        // Load Infection Data (rest remains the same)
+        Optional<InfectionData> data = infectionRepository.getInfectionData(playerId);
         data.ifPresent(infectionData -> activeInfections.put(playerId, infectionData));
     }
 
+
     /**
      * Marks a player as infected, starting at STAGE_ONE.
-     * Informs the player and saves the data to the repository.
-     *
-     * @param player The player to infect.
-     * @return true if the player was newly infected, false if already infected.
+     * @return true if the player was newly infected, false if already infected or immune.
      */
     public boolean infectPlayer(Player player) {
-        if (activeInfections.containsKey(player.getUniqueId())) {
+        UUID playerId = player.getUniqueId();
+
+        if (activeInfections.containsKey(playerId)) {
             return false; // Already infected
         }
 
+        // --- IMMUNITY CHECK ---
+        if (isPlayerImmune(playerId)) {
+            // Optional: Send feedback to the attacker/source if this was a contagion event
+            // MessageUtil.sendMessage(player, Component.text("You are currently immune to the plague.", NamedTextColor.LIGHT_PURPLE));
+            return false;
+        }
+        // ----------------------
+
+        // ... (rest of infection logic remains the same) ...
         long now = System.currentTimeMillis();
         PlagueStage initialStage = PlagueStage.STAGE_ONE;
+        InfectionData data = new InfectionData(playerId, initialStage.getStageLevel(), now);
 
-        // Create the data object
-        InfectionData data = new InfectionData(player.getUniqueId(), initialStage.getStageLevel(), now);
-
-        // Add to cache
-        activeInfections.put(player.getUniqueId(), data);
-
-        // Save to database (asynchronously is better, but synchronously for simplicity here)
-        repository.insertInfection(data);
-
-        // Inform the player (Need to implement MessageUtil later)
+        activeInfections.put(playerId, data);
+        infectionRepository.insertInfection(data);
         MessageUtil.sendInfectionMessage(player);
 
         plugin.getLogger().info(player.getName() + " has been infected with the plague.");
@@ -70,26 +127,33 @@ public class PlagueManager {
     }
 
     /**
-     * Cures a player, removing their infection data.
-     *
-     * @param playerId The UUID of the player to cure.
+     * Cures a player and grants them temporary immunity.
      */
     public void curePlayer(UUID playerId) {
-        // Remove from cache
-        activeInfections.remove(playerId);
+        // 1. Grant Immunity
+        int durationSeconds = plugin.getPlagueConfig().getImmunityDurationSeconds();
+        long expiresTime = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(durationSeconds);
 
-        // Remove from database
-        repository.deleteInfection(playerId);
+        activeImmunity.put(playerId, expiresTime);
+        immunityRepository.grantImmunity(playerId, expiresTime);
 
-        // Inform player if they are online
+        // Inform player of immunity
         Player player = Bukkit.getPlayer(playerId);
+        if (player != null) {
+            MessageUtil.sendMessage(player, Component.text("You are now immune for " + durationSeconds + " seconds!", NamedTextColor.LIGHT_PURPLE));
+        }
+
+        // 2. Remove Infection (rest remains the same)
+        activeInfections.remove(playerId);
+        infectionRepository.deleteInfection(playerId);
+
         if (player != null && player.isOnline()) {
             MessageUtil.sendCureMessage(player);
             // Also remove any active potion effects applied by the plague
             removePlagueEffects(player);
         }
 
-        plugin.getLogger().info("Player " + playerId + " has been cured of the plague.");
+        plugin.getLogger().info("Player " + playerId + " has been cured and granted immunity.");
     }
 
     /**
@@ -117,7 +181,7 @@ public class PlagueManager {
             data.setStage(nextStage.getStageLevel());
 
             // Update database (asynchronously is better)
-            repository.updateInfectionStage(playerId, nextStage.getStageLevel());
+            infectionRepository.updateInfectionStage(playerId, nextStage.getStageLevel());
 
             // Inform player if it's the final stage notification
             if (nextStage == PlagueStage.STAGE_FINAL) {
