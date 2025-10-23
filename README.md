@@ -18,7 +18,7 @@ This plugin introduces a multi-stage disease that spreads via hostile mobs, cont
 
 ### Requirements
 
-  * **Server Type:** PaperMC (Recommended 1.18+)
+  * **Server Type:** PaperMC (Recommended 1.21+)
   * **Java Version:** Java 17+
 
 ### Steps
