@@ -85,8 +85,10 @@ All administrative commands use the root alias `/plague` or `/p`. All commands b
 | Command | Usage | Permission | Description |
 | :--- | :--- | :--- | :--- |
 | `/plague help` | | `astradalplague.admin.help` | Displays the help menu. |
+| **`/plague toggle`** | | `astradalplague.admin.toggle` | **Globally enables/disables** all plugin systems, including progression and spread. |
+| **`/plague check <player>`** | `/p check Pookachu` | `astradalplague.admin.check` | Displays detailed status: infection stage, time infected, and **remaining immunity time**. |
 | `/plague infect <player>` | `/p infect Pookachu` | `astradalplague.admin.infect` | Manually infects a target player (starts at Stage 1). |
-| `/plague cure <player>` | `/p cure Pookachu` | `astradalplague.admin.cure` | Manually removes the plague from a player. |
+| `/plague cure <player>` | `/p cure Pookachu` | `astradalplague.admin.cure` | Manually removes the plague and grants temporary immunity. |
 | `/plague stage <player> <stage>` | `/p stage Pookachu 3` | `astradalplague.admin.stage` | Forcefully sets the infected player's plague stage (1, 2, or 3). |
 | `/plague reload` | | `astradalplague.admin.reload` | Reloads `config.yml` (effects, timers) and hospital regions. |
 
