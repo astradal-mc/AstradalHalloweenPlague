@@ -36,44 +36,50 @@ This plugin introduces a multi-stage disease that spreads via hostile mobs, cont
 The primary configuration controls the plague's spread, progression, and cure time.
 
 ```yaml
+# Astradal Halloween Plague Configuration
+
 progression_settings:
 
-  # Time (in seconds) required for a player to be cured in a hospital zone.
-  cure_time_seconds: 45 
+  # Time in seconds required to progress from the current stage to the next.
+  # 0 means no further automatic progression.
+  infection_radius: 5.0 # Proximity infection radius in blocks
 
-  # Proximity infection radius in blocks (used in PlagueProgressionTask)
-  infection_radius: 5.0 
-  
-  # New setting: Percentage chance (0.0 to 100.0) that a player gets infected 
-  # when struck by a Zombie.
-  zombie_infection_chance_percent: 10 
+  # Time (in seconds) required for a player to be cured in a hospital zone.
+  # If 45 seconds seems too fast, you can increase this value here.
+  cure_time_seconds: 45
+
+  # Setting for Zombie Infection Chance
+  zombie_infection_chance_percent: 10 # 10% chance to infect on hit
+
+  # Duration (in seconds) a player is immune after being cured.
+  immunity_duration_seconds: 300 # 5 minutes of immunity after cure
 
   stages:
-    
+
     # STAGE ONE: Initial Incubation / Minor Symptoms
     STAGE_ONE:
-      time_to_next_stage_seconds: 180 # 3 minutes
+      time_to_next_stage_seconds: 180 # 10 minutes
       effects:
-        # Format: EFFECT_TYPE (modern name), AMPLIFIER (0=I, 1=II), DURATION_SECONDS
-        - "HUNGER, 0, 6"
-        - "NAUSEA, 0, 3" 
-        
-    # STAGE TWO: Highly Contagious - Proximity spread becomes active here
+        # Format: EFFECT_TYPE, AMPLIFIER, DURATION_SECONDS
+        - "HUNGER, 0, 6" # Hunger I for 6 seconds (reapplied every second by task)
+        - "NAUSEA, 0, 3" # Nausea I for 3 seconds
+
+    # STAGE TWO: Visible Symptoms / Highly Contagious
     STAGE_TWO:
-      time_to_next_stage_seconds: 300 # 5 minutes
+      time_to_next_stage_seconds: 300 # 15 minutes
       effects:
-        - "WEAKNESS, 0, 6"
-        - "SLOWNESS, 0, 6"
-        - "NAUSEA, 1, 5"
-        
+        - "WEAKNESS, 0, 6" # Weakness I
+        - "SLOWNESS, 0, 6" # Slowness I
+        - "NAUSEA, 1, 5" # Nausea II
+
     # STAGE FINAL: Critical / Maximum Debuffs
     STAGE_FINAL:
       time_to_next_stage_seconds: 0 # No further progression
       effects:
-        - "WEAKNESS, 1, 6"
-        - "SLOWNESS, 1, 6"
-        - "BLINDNESS, 0, 3"
-        - "POISON, 0, 1"
+        - "WEAKNESS, 1, 6" # Weakness II
+        - "SLOWNESS, 1, 6" # Slowness II
+        - "BLINDNESS, 0, 3" # Blindness I
+        - "POISON, 0, 1" # Minor, occasional poison damage
 ```
 
 -----
