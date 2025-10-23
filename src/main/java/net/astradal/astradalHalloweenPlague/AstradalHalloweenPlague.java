@@ -30,6 +30,7 @@ public class AstradalHalloweenPlague extends JavaPlugin {
     private RegionUtil regionUtil;
     private StaffSelection staffSelection;
     private PlagueConfig plagueConfig;
+    private volatile boolean enabledState = true;
 
     @Override
     public void onEnable() {
@@ -124,6 +125,20 @@ public class AstradalHalloweenPlague extends JavaPlugin {
         // for effects and timings in its next run via PlagueStage.getEffects()
     }
 
+    /**
+     * Toggles the plugin's operational state.
+     */
+    public void setPluginEnabled(boolean enabled) {
+        this.enabledState = enabled;
+
+        if (!enabled) {
+            // Optional: Perform global cleanup when disabled
+            getLogger().warning("Plague disabled by command. Note: Active infections remain in the database.");
+        } else {
+            getLogger().info("Plague enabled by command. Infection systems are now active.");
+        }
+    }
+
     // --- Getters for Managers ---
 
     public InfectionRepository getInfectionRepository() {
@@ -151,4 +166,8 @@ public class AstradalHalloweenPlague extends JavaPlugin {
     public PlagueConfig getPlagueConfig() {
         return plagueConfig;
     }
+
+    public boolean isPluginEnabled() { return enabledState; }
+
+
 }

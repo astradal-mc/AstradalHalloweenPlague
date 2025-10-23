@@ -35,6 +35,7 @@ public class HospitalListener implements Listener {
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent event) {
+        if (!plugin.isPluginEnabled()) return;
         // Only check if player changes the block they are standing on OR leaves the region
         if (event.getFrom().getBlock().equals(event.getTo().getBlock())) return;
 
@@ -76,6 +77,7 @@ public class HospitalListener implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
+        if (!plugin.isPluginEnabled()) return;
         // Cancel and clean up the session if they log out
         CuringTask task = activeCuringSessions.get(event.getPlayer().getUniqueId());
         if (task != null) {

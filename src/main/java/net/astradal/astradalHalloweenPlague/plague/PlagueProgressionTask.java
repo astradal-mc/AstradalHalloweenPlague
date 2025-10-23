@@ -28,6 +28,7 @@ public class PlagueProgressionTask extends BukkitRunnable { // <-- CHANGE HERE: 
 
     @Override
     public void run() {
+        if (!plugin.isPluginEnabled()) return;
         // Iterate over a copy of the key set to avoid ConcurrentModificationException
         // if an infection is removed/added during the loop.
         for (UUID infectedId : plagueManager.getActiveInfections().keySet()) {

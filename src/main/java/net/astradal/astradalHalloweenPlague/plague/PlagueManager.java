@@ -238,4 +238,20 @@ public class PlagueManager {
     public Map<UUID, InfectionData> getActiveInfections() {
         return activeInfections;
     }
+
+    /**
+     * Retrieves the infection data for a player from the cache.
+     * @param playerId The UUID of the player.
+     * @return An Optional containing InfectionData if the player is infected.
+     */
+    public Optional<InfectionData> getInfectionData(UUID playerId) {
+        // Note: This relies on the data being loaded into the cache on join.
+        InfectionData data = activeInfections.get(playerId);
+        return Optional.ofNullable(data);
+    }
+
+    // ... (getActiveImmunity method added for access by CheckCommand) ...
+    public Map<UUID, Long> getActiveImmunity() {
+        return activeImmunity;
+    }
 }

@@ -28,10 +28,12 @@ public final class PlagueCommand {
         rootNode.then(InfectCommand.build(plugin));
         rootNode.then(CureCommand.build(plugin));
         rootNode.then(StageCommand.build(plugin));
+        rootNode.then(CheckCommand.build(plugin));
+        rootNode.then(ReloadCommand.build(plugin));
+        rootNode.then(ToggleCommand.build(plugin));
 
         // Region Management Subcommands
         rootNode.then(RegionCommand.build(plugin));
-        rootNode.then(ReloadCommand.build(plugin));
 
         return rootNode;
     }

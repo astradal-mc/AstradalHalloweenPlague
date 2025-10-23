@@ -34,6 +34,7 @@ public class InfectionListener implements Listener {
      */
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerHit(EntityDamageByEntityEvent event) {
+        if (!plugin.isPluginEnabled()) return;
         // --- 1. INITIAL CHECKS ---
 
         // Ensure the receiver is a player
@@ -93,6 +94,7 @@ public class InfectionListener implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(PlayerJoinEvent event) {
+        if (!plugin.isPluginEnabled()) return;
         // Load data on the main thread for simplicity, but consider async if data is large.
         // For a single SQLite entry, sync is usually fine on join.
         plagueManager.loadInfection(event.getPlayer().getUniqueId());
@@ -106,6 +108,7 @@ public class InfectionListener implements Listener {
      */
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
+        if (!plugin.isPluginEnabled()) return;
         // Remove from cache to save memory, but keep in DB
         plagueManager.getActiveInfections().remove(event.getPlayer().getUniqueId());
     }
