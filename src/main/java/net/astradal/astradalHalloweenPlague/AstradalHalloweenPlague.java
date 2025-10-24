@@ -38,6 +38,10 @@ public class AstradalHalloweenPlague extends JavaPlugin {
         // For now, we'll keep it just in case.
         saveDefaultConfig();
 
+        // --- READ PERSISTENT TOGGLE STATE ---
+        this.enabledState = getConfig().getBoolean("plugin_enabled_on_startup", true);
+        getLogger().info("Plague system loaded in state: " + (this.enabledState ? "ENABLED" : "DISABLED"));
+
         this.plagueConfig = new PlagueConfig(this);
         PlagueStage.initialize(this.plagueConfig);
 
@@ -126,16 +130,20 @@ public class AstradalHalloweenPlague extends JavaPlugin {
     }
 
     /**
-     * Toggles the plugin's operational state.
+     * Toggles the plugin's operational state and persists the new state to config.yml.
      */
     public void setPluginEnabled(boolean enabled) {
         this.enabledState = enabled;
 
+        // 1. Persist the new state to the config file
+        getConfig().set("plugin_enabled_on_startup", enabled);
+        saveConfig(); // <-- SAVES THE STATE TO DISK
+
+        // 2. Perform actions based on the new state
         if (!enabled) {
-            // Optional: Perform global cleanup when disabled
-            getLogger().warning("Plague disabled by command. Note: Active infections remain in the database.");
+            getLogger().warning("Plague disabled by command. State saved.");
         } else {
-            getLogger().info("Plague enabled by command. Infection systems are now active.");
+            getLogger().info("Plague enabled by command. State saved. Infection systems are now active.");
         }
     }
 

@@ -1,6 +1,12 @@
 # Astradal Halloween Plague Configuration
 
+# Plugin Operational State:
+# If set to 'false', the plugin will run no listeners, tasks, or plague logic
+# upon startup until a staff member uses /plague toggle.
+plugin_enabled_on_startup: true
+
 progression_settings:
+
 
   # Time in seconds required to progress from the current stage to the next.
   # 0 means no further automatic progression.
