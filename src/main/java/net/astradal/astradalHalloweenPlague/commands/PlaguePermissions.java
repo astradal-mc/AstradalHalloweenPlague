@@ -9,16 +9,15 @@ import org.bukkit.permissions.Permissible;
  */
 public final class PlaguePermissions {
 
-    private static final String BASE = "astradal.plague.";
-    private static final String ADMIN_BASE = BASE + "admin.";
+    private static final String BASE = "astradal.plague.command.";
 
     /**
      * Gets the full permission string for a subcommand.
      * @param subcommand The subcommand name (e.g., "infect").
-     * @return The full permission string (e.g., "astradal.plague.admin.infect").
+     * @return The full permission string (e.g., "astradal.plague.command.admin.infect").
      */
     public static String get(String subcommand) {
-        return ADMIN_BASE + subcommand;
+        return BASE + subcommand;
     }
 
     /**

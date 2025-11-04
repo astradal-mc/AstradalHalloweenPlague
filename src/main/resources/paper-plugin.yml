@@ -6,3 +6,35 @@ prefix: AstradalPlague
 authors: [ Pookachu ]
 description: A plugin for Astradal that adds a plague for the Halloween Event 2025
 website: https://www.astradal.net
+
+permissions:
+  astradal.plague.command.help:
+    description: "Lets player get the help menu for plague commands"
+    default: true
+  astradal.plague.command.reload:
+    description: "Lets player reload the AstradalPorts plugin"
+    default: op
+  astradal.plague.command.version:
+    description: "Lets player view the AstradalPorts plugin version"
+    default: op
+  astradal.plague.command.toggle:
+    description: "Lets player toggle the plugin"
+    default: op
+  astradal.plague.command.infect:
+    description: "Lets player infect other players"
+    default: op
+  astradal.plague.command.cure:
+    description: "Lets player cure other players of the plague"
+    default: op
+  astradal.plague.command.region:
+    description: "Lets player create hospital regions"
+    default: op
+  astradal.plague.command.stage:
+    description: "Lets player set players to particular plague stages"
+    default: op
+
+commands:
+  plague:
+    description: "Manage Plague"
+    usage: "/plague <subcommand>"
+    permission: astradal.plague.command
