@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+    id('java')
     id("xyz.jpenilla.run-paper") version "2.3.1"
 }
 
@@ -47,9 +47,9 @@ tasks.withType(JavaCompile).configureEach {
 
 processResources {
     def props = [version: version]
-    inputs.properties props
-    filteringCharset 'UTF-8'
+    inputs.properties(props)
+    filteringCharset = 'UTF-8'
     filesMatching('paper-plugin.yml') {
-        expand props
+        expand(props)
     }
 }
