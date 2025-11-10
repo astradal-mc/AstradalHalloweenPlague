@@ -110,13 +110,13 @@ public class AstradalHalloweenPlague extends JavaPlugin {
             // 3. Register the main command node.
             registrar.register(plagueNode, "Manage Plague Status and Hospital Regions");
 
-            // 4. Create the alias node (/p) that redirects to the main node, and register it.
-            LiteralCommandNode<CommandSourceStack> aliasNode = Commands.literal("p")
-                .redirect(plagueNode)
-                .build();
-            registrar.register(aliasNode, "Alias for /plague");
+//            // 4. Create the alias node (/p) that redirects to the main node, and register it.
+//            LiteralCommandNode<CommandSourceStack> aliasNode = Commands.literal("p")
+//                .redirect(plagueNode)
+//                .build();
+//            registrar.register(aliasNode, "Alias for /plague");
 
-            getLogger().info("Registered /plague and /p commands using Paper Brigadier.");
+            getLogger().info("Registered /plague command using Paper Brigadier.");
         });
     }
 

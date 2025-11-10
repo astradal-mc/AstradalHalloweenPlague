@@ -6,8 +6,6 @@
 plugin_enabled_on_startup: true
 
 progression_settings:
-
-
   # Time in seconds required to progress from the current stage to the next.
   # 0 means no further automatic progression.
   infection_radius: 5.0 # Proximity infection radius in blocks
@@ -23,7 +21,6 @@ progression_settings:
   immunity_duration_seconds: 300 # 5 minutes of immunity after cure
 
   stages:
-
     # STAGE ONE: Initial Incubation / Minor Symptoms
     STAGE_ONE:
       time_to_next_stage_seconds: 180 # 10 minutes
